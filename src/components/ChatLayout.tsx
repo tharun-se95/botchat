@@ -1,0 +1,52 @@
+import { useEffect, useRef } from "react";
+import { MessageBubble } from "./MessageBubble";
+import { ChatInput } from "./ChatInput";
+
+interface Message {
+  sender: "user" | "bot";
+  text: string;
+}
+
+interface ChatLayoutProps {
+  messages: Message[];
+  onSend: (message: string) => void;
+  isTyping: boolean;
+  disabled: boolean;
+}
+
+export function ChatLayout({
+  messages,
+  onSend,
+  isTyping,
+  disabled,
+}: ChatLayoutProps) {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  return (
+    <div className="flex flex-col items-center justify-center w-full h-full bg-chatBackground">
+      <div className="w-full h-20 bg-chatBackground"></div>
+      <div className="flex flex-col w-1/2 h-full overflow-y-auto scrollbar-hide ">
+        <div className="flex-1  p-4 space-y-4 ">
+          {messages.map((msg, i) => (
+            <MessageBubble
+              key={i}
+              sender={msg.sender}
+              text={msg.text}
+              isTyping={
+                isTyping && i === messages.length - 1 && msg.sender === "bot"
+              }
+            />
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+      <div className="sticky flex justify-center items-center w-1/2 h-[150px] p-4 rounded-3xl bottom-10 bg-surface">
+        <ChatInput onSend={onSend} disabled={disabled} />
+      </div>
+    </div>
+  );
+}
