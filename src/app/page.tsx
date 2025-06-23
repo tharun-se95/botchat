@@ -5,20 +5,25 @@ import { Sidebar } from "@/components/Sidebar";
 import { Menu, Pencil, Search, Library } from "lucide-react";
 import { Tooltip } from "@/components/Tooltip";
 import { useChat } from "@/contexts/ChatContext";
+import { MODEL_OPTIONS, ModelOption } from "@/lib/models";
 
 export default function Home() {
   const {
     messages,
     isTyping,
-    isStreaming,
-    sendStreamMessage,
+    sendMessage,
     isLoading,
     error,
   } = useChat();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0].value);
 
   const handleSend = async (message: string) => {
-    await sendStreamMessage(message);
+    await sendMessage(message, selectedModel);
+  };
+
+  const handleModelChange = (model: string) => {
+    setSelectedModel(model);
   };
 
   return (
@@ -64,7 +69,9 @@ export default function Home() {
           onSend={handleSend}
           isTyping={isTyping}
           disabled={isTyping || isLoading}
-          isStreaming={isStreaming}
+          models={MODEL_OPTIONS}
+          selectedModel={selectedModel}
+          onModelChange={handleModelChange}
         />
       </div>
     </main>

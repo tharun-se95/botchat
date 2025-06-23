@@ -2,9 +2,9 @@ import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, AIMessage } from "@langchain/core/messages";
 
 // Initialize the OpenAI chat model
-const createChatModel = (streaming: boolean = false) => {
+const createChatModel = (streaming: boolean = false, modelOverride?: string) => {
   const apiKey = process.env.OPENAI_API_KEY;
-  const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+  const model = modelOverride || process.env.OPENAI_MODEL || "gpt-4o-mini";
 
   if (!apiKey) {
     throw new Error("OPENAI_API_KEY is not set in environment variables");
@@ -39,10 +39,11 @@ const convertToLangChainMessages = (messages: ChatMessage[]) => {
 // Main function to get response from OpenAI (non-streaming)
 export async function getOpenAIResponse(
   userMessage: string,
-  conversationHistory: ChatMessage[] = []
+  conversationHistory: ChatMessage[] = [],
+  model?: string
 ): Promise<string> {
   try {
-    const chatModel = createChatModel(false);
+    const chatModel = createChatModel(false, model);
 
     // Convert conversation history to LangChain format
     const langChainMessages = convertToLangChainMessages(conversationHistory);
@@ -77,10 +78,11 @@ export async function getOpenAIResponse(
 // Streaming function to get response from OpenAI
 export async function* getOpenAIStreamResponse(
   userMessage: string,
-  conversationHistory: ChatMessage[] = []
+  conversationHistory: ChatMessage[] = [],
+  model?: string
 ): AsyncGenerator<string, void, unknown> {
   try {
-    const chatModel = createChatModel(true);
+    const chatModel = createChatModel(true, model);
 
     // Convert conversation history to LangChain format
     const langChainMessages = convertToLangChainMessages(conversationHistory);

@@ -1,10 +1,16 @@
 import { NextRequest } from "next/server";
-import { getOpenAIStreamResponse, ChatMessage } from "@/lib/openai-service";
+import { getOpenAIStreamResponse, ChatMessage as OpenAIMessage } from "@/lib/openai-service";
+import { getTogetherResponse, ChatMessage as TogetherMessage } from "@/lib/together-service";
+
+const TOGETHER_MODELS = [
+  "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+  "togethercomputer/llama-2-70b-chat"
+];
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { message, conversationHistory = [] } = body;
+    const { message, conversationHistory = [], model } = body;
 
     if (!message || typeof message !== "string") {
       return new Response(
@@ -26,25 +32,39 @@ export async function POST(request: NextRequest) {
             encoder.encode(`data: ${JSON.stringify({ type: "start" })}\n\n`)
           );
 
-          // Get streaming response from OpenAI
-          const streamResponse = getOpenAIStreamResponse(
-            message,
-            conversationHistory
-          );
-
-          for await (const chunk of streamResponse) {
-            // Send each chunk as a data event
+          if (model && TOGETHER_MODELS.includes(model)) {
+            // Together does not support streaming in this codebase, so just yield the full response
+            const response = await getTogetherResponse(message, conversationHistory, model);
             controller.enqueue(
               encoder.encode(
-                `data: ${JSON.stringify({ type: "chunk", content: chunk })}\n\n`
+                `data: ${JSON.stringify({ type: "chunk", content: response })}\n\n`
               )
             );
-          }
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({ type: "done" })}\n\n`)
+            );
+          } else {
+            // Get streaming response from OpenAI
+            const streamResponse = getOpenAIStreamResponse(
+              message,
+              conversationHistory,
+              model
+            );
 
-          // Send completion message
-          controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify({ type: "done" })}\n\n`)
-          );
+            for await (const chunk of streamResponse) {
+              // Send each chunk as a data event
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({ type: "chunk", content: chunk })}\n\n`
+                )
+              );
+            }
+
+            // Send completion message
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({ type: "done" })}\n\n`)
+            );
+          }
         } catch (error) {
           console.error("Streaming error:", error);
           const errorMessage =

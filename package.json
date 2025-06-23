@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@fontsource/inter": "^5.0.16",
+    "@langchain/community": "^0.3.47",
     "@langchain/core": "^0.3.61",
     "@langchain/openai": "^0.5.15",
     "@radix-ui/react-tooltip": "^1.2.7",
+    "axios": "^1.10.0",
     "clsx": "^2.1.0",
     "langchain": "^0.3.29",
     "lucide-react": "^0.522.0",

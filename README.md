@@ -1,10 +1,10 @@
 # BotChat - AI-Powered Chat Application
 
-A modern, responsive chat application built with Next.js, TypeScript, and Tailwind CSS, integrated with OpenAI's language models through LangChain. Features a clean, service-oriented architecture for maximum reusability and maintainability.
+A modern, responsive chat application built with Next.js, TypeScript, and Tailwind CSS, integrated with OpenAI and Together.ai language models through LangChain. Features a clean, service-oriented architecture for maximum reusability and maintainability.
 
 ## ✨ Features
 
-- 🤖 **AI-Powered Responses**: Connect to OpenAI's GPT models for intelligent conversations
+- 🤖 **AI-Powered Responses**: Connect to OpenAI and Together.ai models for intelligent conversations
 - 💬 **Real-time Chat**: Smooth, responsive chat interface with typing indicators
 - 🎨 **Modern UI**: Beautiful, responsive design with Tailwind CSS
 - 📱 **Mobile Friendly**: Works seamlessly on desktop and mobile devices
@@ -13,6 +13,7 @@ A modern, responsive chat application built with Next.js, TypeScript, and Tailwi
 - 🏗️ **Service Architecture**: Clean separation of concerns with Context, Services, and Hooks
 - 📊 **Conversation Analytics**: Export conversations and view statistics
 - ⚙️ **Configurable**: Easy-to-customize settings and preferences
+- 🔄 **Multi-Provider Support**: Easily switch between OpenAI and Together.ai models from the UI
 
 ## 🏗️ Architecture
 
@@ -36,7 +37,8 @@ The application follows a modern React architecture with clear separation of con
 
 - Node.js 18+
 - npm or yarn
-- OpenAI API key
+- OpenAI API key (for OpenAI models)
+- Together.ai API key (for Together.ai models)
 
 ## 🚀 Getting Started
 
@@ -53,18 +55,20 @@ cd botchat
 npm install
 ```
 
-### 3. Set up OpenAI API Key
+### 3. Set up API Keys
 
-1. Get your OpenAI API key from [OpenAI Platform](https://platform.openai.com/api-keys)
-2. Create a `.env.local` file in the root directory
-3. Add your API key:
+Create a `.env.local` file in the root directory and add your API keys:
 
 ```env
 # OpenAI Configuration
 OPENAI_API_KEY=your_actual_openai_api_key_here
-
 # Optional: Model configuration (defaults to gpt-3.5-turbo)
 OPENAI_MODEL=gpt-3.5-turbo
+
+# Together.ai Configuration
+TOGETHER_API_KEY=your_actual_together_ai_api_key_here
+# Optional: Model configuration (defaults to meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo)
+TOGETHER_MODEL=meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo
 ```
 
 ### 4. Run the development server
@@ -81,7 +85,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 botchat/
 ├── src/
 │   ├── app/
-│   │   ├── api/chat/          # API route for OpenAI integration
+│   │   ├── api/chat/          # API route for model integration
 │   │   ├── globals.css        # Global styles
 │   │   ├── layout.tsx         # Root layout with ChatProvider
 │   │   └── page.tsx           # Main chat page (simplified)
@@ -97,6 +101,8 @@ botchat/
 │   │   └── useChatActions.ts  # Chat-related actions and utilities
 │   ├── lib/                   # Utility libraries
 │   │   ├── openai-service.ts  # LangChain OpenAI integration
+│   │   ├── together-service.ts# LangChain Together.ai integration
+│   │   ├── models.ts          # List of supported models/providers
 │   │   ├── chatUtils.ts       # Chat utility functions
 │   │   └── config.ts          # Application configuration
 │   └── services/              # Service layer
@@ -111,8 +117,9 @@ botchat/
 ### **Basic Chat**
 
 1. **Start a Conversation**: Type your message in the input field and press Enter
-2. **AI Responses**: The application will send your message to OpenAI and display the AI's response
+2. **AI Responses**: The application will send your message to the selected model and display the AI's response
 3. **Chat History**: Your conversation history is automatically saved and will persist between sessions
+4. **Switch Models**: Use the dropdown at the top to switch between OpenAI and Together.ai models at any time
 
 ### **Advanced Features**
 
@@ -131,64 +138,52 @@ botchat/
 
 ### **Environment Variables**
 
-- `OPENAI_API_KEY`: Your OpenAI API key (required)
+- `OPENAI_API_KEY`: Your OpenAI API key (required for OpenAI models)
 - `OPENAI_MODEL`: The OpenAI model to use (optional, defaults to `gpt-3.5-turbo`)
+- `TOGETHER_API_KEY`: Your Together.ai API key (required for Together.ai models)
+- `TOGETHER_MODEL`: The Together.ai model to use (optional, defaults to `meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo`)
 
-### **Runtime Configuration**
+### **Supported Providers and Models**
 
-The app includes a configurable settings system accessible via `src/lib/config.ts`:
+The app supports multiple providers and models. You can select any of these from the dropdown in the UI:
 
-```typescript
-// Example: Update OpenAI settings
-configService.update("openai", {
-  temperature: 0.8,
-  maxTokens: 1500,
-});
+**Providers:**
+- OpenAI
+- Together.ai
 
-// Example: Update UI settings
-configService.update("ui", {
-  showTimestamps: false,
-  theme: "dark",
-});
-```
+**Models:**
+- GPT-4o Mini (OpenAI)
+- GPT-3.5 Turbo (OpenAI)
+- Llama 3.3 70B Turbo (Together.ai)
+- Llama 3.1 8B Instruct Turbo (Together.ai)
+- Qwen3 235B A22B FP8 Throughput (Together.ai)
+- Qwen 2.5 72B Instruct Turbo (Together.ai)
+- DeepSeek R1 (Together.ai)
+- DeepSeek V3 (Together.ai)
+- Perplexity AI R1-1776 (Together.ai)
+- Magistral Small 2506 (Together.ai)
+- Marin 8B Instruct (Together.ai)
+- Mistral Small 3 Instruct (24B) (Together.ai)
+- Llama 3.1 Nemotron 70B (NVIDIA) (Together.ai)
+- Arcee AI Virtuoso Medium (Together.ai)
+- Arcee AI Maestro (Together.ai)
+- Arcee AI Blitz (Together.ai)
+- Llama 3.1 405B Instruct Turbo (Together.ai)
+- Llama 3.2 3B Instruct Turbo (Together.ai)
+- Llama 3 8B Instruct Lite (Together.ai)
+- Llama 3 8B Instruct Reference (Together.ai)
+- Llama 3 70B Instruct Reference (Together.ai)
+- Gemma 2 27B (Together.ai)
+- Mistral 7B Instruct v0.3 (Together.ai)
+- Nous Hermes 2 - Mixtral 8x7B-DPO (Together.ai)
 
-### **Available Models**
-
-- `gpt-3.5-turbo` (default, recommended for most use cases)
-- `gpt-4` (more capable but more expensive)
-- `gpt-4-turbo` (latest GPT-4 model)
-
-## 🔧 Development
-
-### **Architecture Patterns**
-
-1. **Context Pattern**: Global state management with React Context
-2. **Service Pattern**: API communication abstracted into services
-3. **Hook Pattern**: Reusable logic encapsulated in custom hooks
-4. **Utility Pattern**: Pure functions for common operations
-
-### **Adding New Features**
-
-1. **New API Endpoint**: Add to `src/app/api/`
-2. **New Service**: Create in `src/services/`
-3. **New Hook**: Add to `src/hooks/`
-4. **New Component**: Place in `src/components/`
-
-### **Testing**
-
-```bash
-# Run tests (when implemented)
-npm test
-
-# Run type checking
-npm run type-check
-```
+> **Note:** The list of models is maintained in `src/lib/models.ts` for easy updates.
 
 ## 🛠️ Technologies Used
 
 - **Frontend**: Next.js 15, React 19, TypeScript
 - **Styling**: Tailwind CSS, Tailwind Typography
-- **AI Integration**: LangChain, OpenAI API
+- **AI Integration**: LangChain, OpenAI API, Together.ai API
 - **State Management**: React Context API
 - **Icons**: Lucide React
 - **Markdown**: React Markdown with GitHub Flavored Markdown
@@ -198,15 +193,15 @@ npm run type-check
 
 ### **Common Issues**
 
-1. **"Configuration Error"**: Make sure your OpenAI API key is correctly set in `.env.local`
-2. **"API Quota Exceeded"**: Check your OpenAI account usage and billing
+1. **"Configuration Error"**: Make sure your OpenAI and Together.ai API keys are correctly set in `.env.local`
+2. **"API Quota Exceeded"**: Check your OpenAI and Together.ai account usage and billing
 3. **"Network Error"**: Verify your internet connection and try again
 4. **"Context Error"**: Ensure components are wrapped in `ChatProvider`
 
 ### **Getting Help**
 
 - Check the browser console for detailed error messages
-- Verify your OpenAI API key is valid and has sufficient credits
+- Verify your OpenAI and Together.ai API keys are valid and have sufficient credits
 - Ensure all environment variables are properly set
 - Review the Context and Service implementations for debugging
 

@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOpenAIResponse, ChatMessage } from "@/lib/openai-service";
+import { getOpenAIResponse, ChatMessage as OpenAIMessage } from "@/lib/openai-service";
+import { getTogetherResponse, ChatMessage as TogetherMessage } from "@/lib/together-service";
+import { MODEL_OPTIONS, PROVIDERS } from "@/lib/models";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { message, conversationHistory = [] } = body;
+    const { message, conversationHistory = [], model } = body;
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
@@ -13,8 +15,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get response from OpenAI
-    const response = await getOpenAIResponse(message, conversationHistory);
+    // Find the provider for the selected model
+    const modelOption = MODEL_OPTIONS.find((m) => m.value === model);
+    const provider = PROVIDERS.find((p) => p.id === modelOption?.provider);
+
+    // Log provider and model details
+    console.log(`[Chat API] Provider: ${provider?.name || 'Unknown'} (${provider?.id || 'n/a'}), Model: ${modelOption?.name || model || 'Unknown'} (${modelOption?.value || 'n/a'})`);
+
+    let response;
+    if (provider?.id === 'together') {
+      response = await getTogetherResponse(message, conversationHistory, model);
+    } else {
+      response = await getOpenAIResponse(message, conversationHistory, model);
+    }
 
     return NextResponse.json({ response });
   } catch (error) {
