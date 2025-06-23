@@ -12,6 +12,7 @@ interface ChatLayoutProps {
   onSend: (message: string) => void;
   isTyping: boolean;
   disabled: boolean;
+  isStreaming?: boolean;
 }
 
 export function ChatLayout({
@@ -19,6 +20,7 @@ export function ChatLayout({
   onSend,
   isTyping,
   disabled,
+  isStreaming = false,
 }: ChatLayoutProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -29,7 +31,7 @@ export function ChatLayout({
   return (
     <div className="flex flex-col items-center justify-center w-full h-full bg-chatBackground">
       <div className="w-full h-20 bg-chatBackground"></div>
-      <div className="flex flex-col w-1/2 h-full overflow-y-auto scrollbar-hide ">
+      <div className="flex flex-col w-3/4 h-full overflow-y-auto scrollbar-hide ">
         <div className="flex-1  p-4 space-y-4 ">
           {messages.map((msg, i) => (
             <MessageBubble
@@ -39,12 +41,15 @@ export function ChatLayout({
               isTyping={
                 isTyping && i === messages.length - 1 && msg.sender === "bot"
               }
+              isStreaming={
+                isStreaming && i === messages.length - 1 && msg.sender === "bot"
+              }
             />
           ))}
           <div ref={messagesEndRef} />
         </div>
       </div>
-      <div className="sticky flex justify-center items-center w-1/2 h-[150px] p-4 rounded-3xl bottom-10 bg-surface">
+      <div className="sticky flex justify-center items-center w-3/4 h-[150px] p-4 rounded-3xl bottom-10 bg-surface">
         <ChatInput onSend={onSend} disabled={disabled} />
       </div>
     </div>
