@@ -16,7 +16,8 @@ export default function Home() {
     error,
   } = useChat();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0].value);
+  const deepseekV3 = MODEL_OPTIONS.find(m => m.value === "deepseek-ai/DeepSeek-V3");
+  const [selectedModel, setSelectedModel] = useState(deepseekV3 ? deepseekV3.value : MODEL_OPTIONS[0].value);
 
   const handleSend = async (message: string) => {
     await sendMessage(message, selectedModel);

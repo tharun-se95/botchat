@@ -18,20 +18,20 @@ type SidebarProps = {
 };
 
 export function Sidebar({ setIsOpen }: SidebarProps) {
-  const { messages, clearMessages } = useChat();
+  const {
+    messages,
+    sessions,
+    currentSessionId,
+    createNewSession,
+    switchSession,
+    deleteSession,
+    clearMessages,
+  } = useChat();
   const { exportConversation, getConversationStats, hasMessages } =
     useChatActions();
 
   const handleNewChat = () => {
-    if (messages.length > 0) {
-      if (
-        confirm(
-          "Are you sure you want to start a new chat? This will clear the current conversation."
-        )
-      ) {
-        clearMessages();
-      }
-    }
+    createNewSession();
   };
 
   const handleExportChat = () => {
@@ -110,38 +110,71 @@ Duration: ${duration} minutes`);
 
       <hr className="border-surface my-2" />
 
+      {/* Session List */}
+      <div className="mb-4">
+        <h3 className="font-semibold mb-1 text-xs text-gray-400 uppercase tracking-wider">Chats</h3>
+        <ul className="space-y-0.5">
+          {sessions.map((session) => (
+            <li key={session.id} className="flex items-center group">
+              <button
+                className={`flex-1 text-left px-2 py-1 rounded-md truncate text-xs ${
+                  session.id === currentSessionId
+                    ? "bg-blue-100 dark:bg-blue-900 font-semibold text-primaryText"
+                    : "hover:bg-surface text-gray-200"
+                }`}
+                onClick={() => switchSession(session.id)}
+                title={session.title}
+                style={{ maxWidth: '140px' }}
+              >
+                {session.title}
+              </button>
+              <button
+                className="ml-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (confirm("Delete this chat?")) deleteSession(session.id);
+                }}
+                title="Delete chat"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
       {/* Current Chat Info */}
       {hasMessages && (
-        <div className="mb-4 p-3 bg-surface rounded-lg">
-          <h3 className="font-semibold mb-2">Current Chat</h3>
-          <p className="text-xs text-gray-400 mb-2">
+        <div className="mb-3 p-2 bg-surface rounded-md">
+          <h3 className="font-semibold mb-1 text-xs text-gray-400 uppercase tracking-wider">Current Chat</h3>
+          <p className="text-xs text-gray-400 mb-1 truncate">
             {getConversationSummary(messages)}
           </p>
           <div className="flex flex-wrap gap-1">
             <button
               onClick={handleExportChat}
-              className="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="text-xs px-1.5 py-0.5 bg-blue-500 text-white rounded hover:bg-blue-600"
               title="Export as JSON"
             >
-              Export JSON
+              JSON
             </button>
             <button
               onClick={handleExportAsText}
-              className="text-xs px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+              className="text-xs px-1.5 py-0.5 bg-green-500 text-white rounded hover:bg-green-600"
               title="Export as Text"
             >
-              Export TXT
+              TXT
             </button>
             <button
               onClick={handleExportAsMarkdown}
-              className="text-xs px-2 py-1 bg-purple-500 text-white rounded hover:bg-purple-600"
+              className="text-xs px-1.5 py-0.5 bg-purple-500 text-white rounded hover:bg-purple-600"
               title="Export as Markdown"
             >
-              Export MD
+              MD
             </button>
             <button
               onClick={handleShowStats}
-              className="text-xs px-2 py-1 bg-orange-500 text-white rounded hover:bg-orange-600"
+              className="text-xs px-1.5 py-0.5 bg-orange-500 text-white rounded hover:bg-orange-600"
               title="Show Statistics"
             >
               Stats

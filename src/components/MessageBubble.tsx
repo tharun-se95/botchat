@@ -34,8 +34,8 @@ export function MessageBubble({
         className={cn(
           "rounded-2xl p-4 my-8",
           sender === "user"
-            ? "bg-surface text-primaryText prose dark:prose-invert max-w-[80%]"
-            : "text-primaryText w-full prose dark:prose-invert max-w-none"
+            ? "bg-surface text-primaryText prose prose-sm dark:prose-invert max-w-[80%]"
+            : "text-primaryText w-full prose prose-sm dark:prose-invert max-w-none"
         )}
       >
         {sender === "bot" && isStreaming ? (

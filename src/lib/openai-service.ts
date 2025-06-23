@@ -1,5 +1,10 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, AIMessage } from "@langchain/core/messages";
+import { BufferMemory, ConversationSummaryMemory, CombinedMemory, EntityMemory } from "langchain/memory";
+import { ConversationChain } from "langchain/chains";
+
+// Singleton memory instance (per process)
+const memory = new BufferMemory();
 
 // Initialize the OpenAI chat model
 const createChatModel = (streaming: boolean = false, modelOverride?: string) => {
@@ -44,17 +49,34 @@ export async function getOpenAIResponse(
 ): Promise<string> {
   try {
     const chatModel = createChatModel(false, model);
-
-    // Convert conversation history to LangChain format
-    const langChainMessages = convertToLangChainMessages(conversationHistory);
-
-    // Add the current user message
-    langChainMessages.push(new HumanMessage(userMessage));
-
-    // Get response from OpenAI
-    const response = await chatModel.invoke(langChainMessages);
-
-    return response.content as string;
+    // Decide which memory to use based on conversation length
+    let memory;
+    if (conversationHistory.length < 10) {
+      console.log("[Memory] Using BufferMemory");
+      memory = new BufferMemory();
+    } else {
+      console.log("[Memory] Using ConversationSummaryMemory");
+      memory = new ConversationSummaryMemory({ llm: chatModel });
+    }
+    // Optionally, you can use CombinedMemory for more advanced logic
+    // Uncomment below to use CombinedMemory and see log
+    // memory = new CombinedMemory({
+    //   memories: [
+    //     new BufferMemory(),
+    //     new ConversationSummaryMemory({ llm: chatModel }),
+    //     new EntityMemory({ llm: chatModel }),
+    //   ],
+    // });
+    // console.log("[Memory] Using CombinedMemory (Buffer + Summary + Entity)");
+    const chain = new ConversationChain({ llm: chatModel, memory });
+    for (const msg of conversationHistory) {
+      await memory.saveContext(
+        msg.sender === "user" ? { input: msg.text } : {},
+        msg.sender === "bot" ? { output: msg.text } : {}
+      );
+    }
+    const response = await chain.call({ input: userMessage });
+    return response.response || response.text || "";
   } catch (error) {
     console.error("Error getting OpenAI response:", error);
 
