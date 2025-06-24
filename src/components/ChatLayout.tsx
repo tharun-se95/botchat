@@ -43,23 +43,26 @@ export function ChatLayout({
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full bg-chatBackground">
-      <div className="w-full h-20 px-4 bg-chatBackground flex items-center justify-start shadow-md">
+      <div className=" w-full h-20 px-4 bg-chatBackground flex items-center justify-start shadow-md">
         <select
-          className="bg-chatBackground w-60 rounded-xl px-4 py-2 "
+          className="bg-surface rounded-xl px-4 py-2 text-sm md:text-base border-none focus:border-none focus:outline-none focus:ring-0 active:border-none active:outline-none active:ring-0 hover:border-none hover:outline-none hover:ring-0 shadow-none"
           value={selectedModel}
           onChange={e => onModelChange?.(e.target.value)}
+          style={{ boxShadow: 'none', border: 'none', outline: 'none' }}
         >
           {groupedModels.map(({ provider, models }) => (
-            <optgroup key={provider.id} label={provider.name}>
+            <optgroup key={provider.id} label={provider.name} className="bg-surface border-none">
               {models.map((model) => (
-                <option key={model.value} value={model.value}>{model.name}</option>
+                <option key={model.value} value={model.value} className="bg-surface border-none">
+                  {model.name}
+                </option>
               ))}
             </optgroup>
           ))}
         </select>
       </div>
       <div className="flex flex-col w-3/4 h-full overflow-y-auto scrollbar-hide ">
-        <div className="flex-1  p-4 space-y-4 ">
+        <div className="flex-1 p-4 space-y-4 text-sm md:text-base">
           {messages.map((msg, i) => (
             <MessageBubble
               key={i}

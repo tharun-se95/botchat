@@ -31,7 +31,7 @@ export default function Home() {
     <main className="w-screen h-screen bg-background flex">
       <div
         className={`h-full bg-sidebar transition-all duration-300 overflow-hidden ${
-          isSidebarOpen ? "w-[15%]" : "w-0"
+          isSidebarOpen ? "w-[20%]" : "w-0"
         }`}
       >
         <Sidebar setIsOpen={setIsSidebarOpen} />

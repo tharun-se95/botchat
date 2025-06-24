@@ -32,7 +32,7 @@ export function MessageBubble({
     >
       <div
         className={cn(
-          "rounded-2xl p-4 my-8",
+          "rounded-2xl p-4 my-8 text-sm md:text-base",
           sender === "user"
             ? "bg-surface text-primaryText prose prose-sm dark:prose-invert max-w-[80%]"
             : "text-primaryText w-full prose prose-sm dark:prose-invert max-w-none"
