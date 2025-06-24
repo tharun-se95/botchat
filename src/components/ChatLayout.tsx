@@ -10,7 +10,7 @@ interface Message {
 
 interface ChatLayoutProps {
   messages: Message[];
-  onSend: (message: string) => void;
+  onSend: (message: string, file?: File) => void;
   isTyping: boolean;
   disabled: boolean;
   isStreaming?: boolean;
@@ -47,13 +47,21 @@ export function ChatLayout({
         <select
           className="bg-surface rounded-xl px-4 py-2 text-sm md:text-base border-none focus:border-none focus:outline-none focus:ring-0 active:border-none active:outline-none active:ring-0 hover:border-none hover:outline-none hover:ring-0 shadow-none"
           value={selectedModel}
-          onChange={e => onModelChange?.(e.target.value)}
-          style={{ boxShadow: 'none', border: 'none', outline: 'none' }}
+          onChange={(e) => onModelChange?.(e.target.value)}
+          style={{ boxShadow: "none", border: "none", outline: "none" }}
         >
           {groupedModels.map(({ provider, models }) => (
-            <optgroup key={provider.id} label={provider.name} className="bg-surface border-none">
+            <optgroup
+              key={provider.id}
+              label={provider.name}
+              className="bg-surface border-none"
+            >
               {models.map((model) => (
-                <option key={model.value} value={model.value} className="bg-surface border-none">
+                <option
+                  key={model.value}
+                  value={model.value}
+                  className="bg-surface border-none"
+                >
                   {model.name}
                 </option>
               ))}
@@ -79,7 +87,7 @@ export function ChatLayout({
           <div ref={messagesEndRef} />
         </div>
       </div>
-      <div className="sticky flex justify-center items-center w-3/4 h-[150px] p-4 rounded-3xl bottom-10 bg-surface">
+      <div className="sticky flex justify-center items-center w-3/4 p-4 rounded-3xl bottom-10 bg-surface">
         <ChatInput onSend={onSend} disabled={disabled} />
       </div>
     </div>

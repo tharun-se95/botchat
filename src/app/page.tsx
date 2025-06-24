@@ -8,19 +8,47 @@ import { useChat } from "@/contexts/ChatContext";
 import { MODEL_OPTIONS, ModelOption } from "@/lib/models";
 
 export default function Home() {
-  const {
-    messages,
-    isTyping,
-    sendMessage,
-    isLoading,
-    error,
-  } = useChat();
+  const { messages, isTyping, sendMessage, isLoading, error } = useChat();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const deepseekV3 = MODEL_OPTIONS.find(m => m.value === "deepseek-ai/DeepSeek-V3");
-  const [selectedModel, setSelectedModel] = useState(deepseekV3 ? deepseekV3.value : MODEL_OPTIONS[0].value);
+  const deepseekV3 = MODEL_OPTIONS.find(
+    (m) => m.value === "deepseek-ai/DeepSeek-V3"
+  );
+  const [selectedModel, setSelectedModel] = useState(
+    deepseekV3 ? deepseekV3.value : MODEL_OPTIONS[0].value
+  );
 
-  const handleSend = async (message: string) => {
-    await sendMessage(message, selectedModel);
+  const handleSend = async (message: string, file?: File) => {
+    try {
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (!res.ok) {
+          throw new Error("File upload failed");
+        }
+        let data;
+        try {
+          data = await res.json();
+        } catch (jsonErr) {
+          throw new Error("Invalid JSON response from upload API");
+        }
+        if (!data || !data.name) {
+          throw new Error("Upload API did not return expected file info");
+        }
+        await sendMessage(
+          `${message}\n[Uploaded file: ${data.name}]`,
+          selectedModel
+        );
+      } else {
+        await sendMessage(message, selectedModel);
+      }
+    } catch (err) {
+      alert("Error uploading file or sending message.");
+      console.error(err);
+    }
   };
 
   const handleModelChange = (model: string) => {
