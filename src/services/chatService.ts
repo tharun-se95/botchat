@@ -53,4 +53,14 @@ export class ChatService {
       return false;
     }
   }
+
+  static async fetchRagContext(message: string, sessionId: string, topK = 5) {
+    const res = await fetch("/api/rag-query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, sessionId, topK }),
+    });
+    if (!res.ok) throw new Error("RAG API error");
+    return res.json();
+  }
 }

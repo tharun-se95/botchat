@@ -79,7 +79,11 @@ function deleteMessagesFromStorage(sessionId: string) {
 }
 
 // Helper to generate a session title using the API route
-async function generateSessionTitle(messages: Message[], model?: string, provider?: string): Promise<string> {
+async function generateSessionTitle(
+  messages: Message[],
+  model?: string,
+  provider?: string
+): Promise<string> {
   // Use the first 3 messages for context
   const contextMsgs = messages.slice(0, 3);
   try {
@@ -159,7 +163,18 @@ export function ChatProvider({ children }: ChatProviderProps) {
     setIsLoading(true);
 
     try {
-      const result = await ChatService.sendMessage(message.trim(), messages, model);
+      // 1. Fetch RAG context
+      const { context } = await ChatService.fetchRagContext(
+        message.trim(),
+        currentSessionId
+      );
+      console.log("[sendMessage] context:", context);
+      // 2. Prepend context to prompt
+      const ragPrompt = context
+        ? `Use the following context to answer the user's question.\nContext:\n${context}\n\nUser: ${message.trim()}`
+        : message.trim();
+      // 3. Call LLM with context-augmented prompt
+      const result = await ChatService.sendMessage(ragPrompt, messages, model);
 
       if (result.error) {
         throw new Error(result.error);
@@ -178,15 +193,21 @@ export function ChatProvider({ children }: ChatProviderProps) {
         const currentMsgs = [...messages, userMessage, botMessage];
         if (currentMsgs.length >= 3) {
           // Only update if still default title
-          const session = sessions.find(s => s.id === currentSessionId);
+          const session = sessions.find((s) => s.id === currentSessionId);
           if (session && session.title === "New Chat") {
             const modelOption = MODEL_OPTIONS.find((m) => m.value === model);
             const provider = modelOption?.provider || "openai";
-            const title = await generateSessionTitle(currentMsgs, model, provider);
+            const title = await generateSessionTitle(
+              currentMsgs,
+              model,
+              provider
+            );
             if (title && title !== "New Chat") {
-              setSessions(prev => prev.map(s =>
-                s.id === currentSessionId ? { ...s, title } : s
-              ));
+              setSessions((prev) =>
+                prev.map((s) =>
+                  s.id === currentSessionId ? { ...s, title } : s
+                )
+              );
             }
           }
         }
